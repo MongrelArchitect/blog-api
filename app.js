@@ -4,6 +4,8 @@ const logger = require('morgan');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
+const loginRoutes = require('./routes/login');
+
 const app = express();
 
 // set up mongoose
@@ -36,7 +38,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // routes
-// XXX
+app.use('/login', loginRoutes);
 
 app.use(json404);
 app.use(jsonError);
