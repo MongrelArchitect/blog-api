@@ -26,10 +26,12 @@ const json404 = (req, res, next) => {
 };
 
 const jsonError = (err, req, res, next) => {
-  res.json({
-    status: res.statusCode,
-    message: err.message,
-  });
+  res
+    .status(500)
+    .json({
+      status: 500,
+      message: err.message,
+    });
 };
 
 app.use(logger('dev'));
