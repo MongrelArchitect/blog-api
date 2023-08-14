@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const loginRoutes = require('./routes/login');
+const postsRoutes = require('./routes/posts');
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use(cookieParser());
 
 // routes
 app.use('/login', loginRoutes);
+app.use('/posts', postsRoutes);
 
 app.use(json404);
 app.use(jsonError);

@@ -15,8 +15,8 @@ exports.postLogin = asyncHandler(async (req, res, next) => {
     const user = await User.findOne({ email });
     if (!user) {
       // incorrect email
-      res.status(404).json({
-        status: 404,
+      res.status(403).json({
+        status: 403,
         message: 'Invalid email or password',
       });
     } else {
@@ -25,8 +25,8 @@ exports.postLogin = asyncHandler(async (req, res, next) => {
         const passMatch = await bcrypt.compare(password, user.password);
         if (!passMatch) {
           // incorrect password
-          res.status(404).json({
-            status: 404,
+          res.status(403).json({
+            status: 403,
             message: 'Invalid email or password',
           });
         } else {
