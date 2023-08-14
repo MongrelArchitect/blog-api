@@ -2,9 +2,19 @@ const asyncHandler = require('express-async-handler');
 const jwt = require('jsonwebtoken');
 const Post = require('../models/post');
 
-exports.getPosts = (req, res) => {
-  res.json({ message: 'GET all posts' });
-};
+exports.getAllPosts = asyncHandler(async (req, res) => {
+  const allPosts = await Post.find({})
+    .populate('author', 'name -_id')
+    .sort({ timestamp: -1 });
+  if (!allPosts.length) {
+    res.status(404).json({
+      status: 404,
+      message: 'Posts not found',
+    });
+  } else {
+    res.json({ status: 200, posts: allPosts });
+  }
+});
 
 exports.postNewPost = [
   // authenticate user & add to request
