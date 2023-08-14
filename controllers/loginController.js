@@ -32,7 +32,7 @@ exports.postLogin = asyncHandler(async (req, res, next) => {
         } else {
           // correct password
           jwt.sign(
-            { user: user.name },
+            { user: { _id: user._id, name: user.name } },
             process.env.JWT_SECRET,
             { expiresIn: '1d' },
             (err, token) => {

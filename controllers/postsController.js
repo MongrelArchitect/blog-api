@@ -1,4 +1,6 @@
+const asyncHandler = require('express-async-handler');
 const jwt = require('jsonwebtoken');
+const Post = require('../models/post');
 
 exports.getPosts = (req, res) => {
   res.json({ message: 'GET all posts' });
@@ -19,12 +21,10 @@ exports.postNewPost = [
     next();
   },
 
-  (req, res) => {
+  (req, res, next) => {
     // we only have a user if jwt is verified
     if (req.user) {
-      // XXX 
-      // Handle actual post creation
-      res.json({ message: 'POST new post' });
+      next();
     } else {
       res.status(403).json({
         status: 403,
@@ -32,4 +32,32 @@ exports.postNewPost = [
       });
     }
   },
+
+  asyncHandler(async (req, res, next) => {
+    try {
+      const post = new Post({
+        author: req.user._id,
+        published: req.body.published !== '',
+        text: req.body.text,
+        timestamp: Date.now(),
+        title: req.body.title,
+      });
+      await post.save();
+      res.set(
+        'Location',
+        `${req.protocol}://${req.hostname}${
+          req.hostname === 'localhost' ? `:${process.env.PORT || 3000}` : null
+        }/posts/${post._id}`,
+      );
+      res.status(201).json({
+        status: 201,
+        message: 'Post created successfully',
+        uri: `${req.protocol}://${req.hostname}${
+          req.hostname === 'localhost' ? `:${process.env.PORT || 3000}` : null
+        }/posts/${post._id}`,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }),
 ];
