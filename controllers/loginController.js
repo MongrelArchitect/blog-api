@@ -2,7 +2,6 @@ const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-require('dotenv').config();
 
 exports.postLogin = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
@@ -13,27 +12,27 @@ exports.postLogin = asyncHandler(async (req, res, next) => {
       message: 'Bad request - needs email and password',
     });
   } else {
-    const sean = await User.findOne({ email });
-    if (!sean) {
+    const user = await User.findOne({ email });
+    if (!user) {
       // incorrect email
       res.status(404).json({
         status: 404,
-        message: 'User not found',
+        message: 'Invalid email or password',
       });
     } else {
       // correct email, check password
       try {
-        const passMatch = await bcrypt.compare(password, sean.password);
+        const passMatch = await bcrypt.compare(password, user.password);
         if (!passMatch) {
           // incorrect password
-          res.status(403).json({
-            status: 403,
-            message: 'Incorrect password',
+          res.status(404).json({
+            status: 404,
+            message: 'Invalid email or password',
           });
         } else {
           // correct password
           jwt.sign(
-            { sean },
+            { user: user.name },
             process.env.JWT_SECRET,
             { expiresIn: '1d' },
             (err, token) => {
@@ -42,7 +41,7 @@ exports.postLogin = asyncHandler(async (req, res, next) => {
                 next(err);
               } else {
                 res.json({
-                  message: `Welcome, ${sean.name}!`,
+                  message: `Welcome, ${user.name}!`,
                   token,
                 });
               }
