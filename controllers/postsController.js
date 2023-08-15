@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const jwt = require('jsonwebtoken');
+const { isValidObjectId } = require('mongoose');
 const Post = require('../models/post');
 
 exports.getAllPosts = asyncHandler(async (req, res) => {
@@ -13,6 +14,26 @@ exports.getAllPosts = asyncHandler(async (req, res) => {
     });
   } else {
     res.json({ status: 200, posts: allPosts });
+  }
+});
+
+exports.getSinglePost = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  if (!isValidObjectId(id)) {
+    res.status(400).json({
+      status: 400,
+      message: `Bad request - invalid post ID (${id})`,
+    });
+  } else {
+    const post = await Post.findById(id).populate('author', 'name -_id');
+    if (!post) {
+      res.status(404).json({
+        status: 404,
+        messasge: `Post not found (${id})`,
+      });
+    } else {
+      res.json(post);
+    }
   }
 });
 
