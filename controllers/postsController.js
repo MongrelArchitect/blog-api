@@ -73,18 +73,11 @@ exports.postNewPost = [
         title: req.body.title,
       });
       await post.save();
-      res.set(
-        'Location',
-        `${req.protocol}://${req.hostname}${
-          req.hostname === 'localhost' ? `:${process.env.PORT || 3000}` : null
-        }/posts/${post._id}`,
-      );
+      res.set('Location', post.uri);
       res.status(201).json({
         status: 201,
         message: 'Post created successfully',
-        uri: `${req.protocol}://${req.hostname}${
-          req.hostname === 'localhost' ? `:${process.env.PORT || 3000}` : null
-        }/posts/${post._id}`,
+        uri: post.uri,
       });
     } catch (err) {
       next(err);
@@ -108,7 +101,7 @@ exports.updatePost = [
           messasge: `Post not found (${id})`,
         });
       } else {
-        const updated = await Post.findByIdAndUpdate(id, {
+        const newPostInfo = {
           author: req.user._id,
           lastEdited: Date.now(),
           published: req.body.published
@@ -117,12 +110,15 @@ exports.updatePost = [
           text: req.body.text || postToUpdate.text,
           timestamp: postToUpdate.timestamp,
           title: req.body.title || postToUpdate.title,
+        };
+        const updated = await Post.findByIdAndUpdate(id, newPostInfo, {
+          new: true,
         });
         if (updated) {
           res.status(200).json({
             status: 200,
             message: 'Updated successfully',
-            uri: updated.uri,
+            post: { ...updated._doc, uri: updated.uri },
           });
         }
       }
