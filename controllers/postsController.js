@@ -42,7 +42,7 @@ exports.postNewPost = [
     try {
       const post = new Post({
         author: req.user._id,
-        published: req.body.published !== '',
+        published: !!req.body.published,
         text: req.body.text,
         timestamp: Date.now(),
         title: req.body.title,
@@ -63,6 +63,44 @@ exports.postNewPost = [
       });
     } catch (err) {
       next(err);
+    }
+  }),
+];
+
+exports.updatePost = [
+  asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    if (!isValidObjectId(id)) {
+      res.status(400).json({
+        status: 400,
+        message: `Bad request - invalid post ID (${id})`,
+      });
+    } else {
+      const postToUpdate = await Post.findById(id);
+      if (!postToUpdate) {
+        res.status(404).json({
+          status: 404,
+          messasge: `Post not found (${id})`,
+        });
+      } else {
+        const updated = await Post.findByIdAndUpdate(id, {
+          author: req.user._id,
+          lastEdited: Date.now(),
+          published: req.body.published
+            ? !!req.body.published
+            : postToUpdate.published,
+          text: req.body.text || postToUpdate.text,
+          timestamp: postToUpdate.timestamp,
+          title: req.body.title || postToUpdate.title,
+        });
+        if (updated) {
+          res.status(200).json({
+            status: 200,
+            message: 'Updated successfully',
+            uri: updated.uri,
+          });
+        }
+      }
     }
   }),
 ];
