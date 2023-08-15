@@ -38,32 +38,6 @@ exports.getSinglePost = asyncHandler(async (req, res) => {
 });
 
 exports.postNewPost = [
-  // authenticate user & add to request
-  (req, res, next) => {
-    const authHeader = req.headers.authorization;
-    if (authHeader) {
-      const token = authHeader.split(' ')[1];
-      jwt.verify(token, process.env.JWT_SECRET, (err, authInfo) => {
-        if (authInfo) {
-          req.user = authInfo.user;
-        }
-      });
-    }
-    next();
-  },
-
-  (req, res, next) => {
-    // we only have a user if jwt is verified
-    if (req.user) {
-      next();
-    } else {
-      res.status(403).json({
-        status: 403,
-        message: 'Forbidden - authorization required',
-      });
-    }
-  },
-
   asyncHandler(async (req, res, next) => {
     try {
       const post = new Post({
@@ -92,3 +66,27 @@ exports.postNewPost = [
     }
   }),
 ];
+
+exports.verifyUser = (req, res, next) => {
+  // check for auth header and verify user
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.JWT_SECRET, (err, authInfo) => {
+      if (authInfo) {
+        // add to request if jwt verified
+        req.user = authInfo.user;
+      }
+    });
+  }
+
+  // check if verified user was added to the request
+  if (req.user) {
+    next();
+  } else {
+    res.status(403).json({
+      status: 403,
+      message: 'Forbidden - authorization required',
+    });
+  }
+};
