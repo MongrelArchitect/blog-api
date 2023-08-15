@@ -40,7 +40,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// routes
 app.use('/login', loginRoutes);
 app.use('/posts', postsRoutes);
 

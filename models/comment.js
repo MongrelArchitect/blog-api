@@ -9,4 +9,8 @@ const CommentSchema = new Schema({
   timestamp: { required: true, type: Date },
 });
 
+CommentSchema.virtual('uri').get(function getUri() {
+  return `/posts/${this.post}/comments/${this._id}`;
+});
+
 module.exports = mongoose.model('Comment', CommentSchema);
