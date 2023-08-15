@@ -3,6 +3,31 @@ const jwt = require('jsonwebtoken');
 const { isValidObjectId } = require('mongoose');
 const Post = require('../models/post');
 
+exports.deletePost = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  if (!isValidObjectId(id)) {
+    res.status(404).json({
+      status: 404,
+      message: `Post not found (${id})`,
+    });
+  } else {
+    const deletedPost = await Post.findByIdAndDelete(id);
+    if (!deletedPost) {
+      // no post with this id in database
+      res.status(404).json({
+        status: 404,
+        message: `Post not found (${id})`,
+      });
+    } else {
+      // deleted successfully
+      res.json({
+        status: 200,
+        message: `Post deleted (${id})`,
+      });
+    }
+  }
+});
+
 exports.getAllPosts = asyncHandler(async (req, res) => {
   const allPosts = await Post.find({})
     .populate('author', 'name -_id')
@@ -20,9 +45,9 @@ exports.getAllPosts = asyncHandler(async (req, res) => {
 exports.getSinglePost = asyncHandler(async (req, res) => {
   const { id } = req.params;
   if (!isValidObjectId(id)) {
-    res.status(400).json({
-      status: 400,
-      message: `Bad request - invalid post ID (${id})`,
+    res.status(404).json({
+      status: 404,
+      message: `Post not found (${id})`,
     });
   } else {
     const post = await Post.findById(id).populate('author', 'name -_id');
@@ -71,9 +96,9 @@ exports.updatePost = [
   asyncHandler(async (req, res) => {
     const { id } = req.params;
     if (!isValidObjectId(id)) {
-      res.status(400).json({
-        status: 400,
-        message: `Bad request - invalid post ID (${id})`,
+      res.status(404).json({
+        status: 404,
+        message: `Post not found (${id})`,
       });
     } else {
       const postToUpdate = await Post.findById(id);
