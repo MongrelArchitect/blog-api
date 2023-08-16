@@ -7,16 +7,20 @@ const router = express.Router();
 
 // for posts
 router.delete(
-  '/:id',
+  '/:postId',
   middleware.verifyUser,
   middleware.checkValidPostId,
   postsController.deletePost,
 );
 router.get('/', postsController.getAllPosts);
-router.get('/:id', middleware.checkValidPostId, postsController.getSinglePost);
+router.get(
+  '/:postId',
+  middleware.checkValidPostId,
+  postsController.getSinglePost,
+);
 router.post('/', middleware.verifyUser, postsController.postNewPost);
 router.put(
-  '/:id',
+  '/:postId',
   middleware.verifyUser,
   middleware.checkValidPostId,
   postsController.updatePost,
@@ -27,6 +31,11 @@ router.post(
   '/:postId/comments/',
   middleware.checkValidPostId,
   commentController.postNewComment,
+);
+router.get(
+  '/:postId/comments/',
+  middleware.checkValidPostId,
+  commentController.getPostComments,
 );
 
 module.exports = router;
