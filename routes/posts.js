@@ -50,5 +50,12 @@ router.post(
   middleware.checkValidPostId,
   commentController.postNewComment,
 );
+router.put(
+  '/:postId/comments/:commentId',
+  middleware.verifyUser,
+  middleware.checkValidPostId,
+  middleware.checkValidCommentId,
+  commentController.updateComment,
+);
 
 module.exports = router;

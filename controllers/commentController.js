@@ -45,6 +45,9 @@ exports.postNewComment = asyncHandler(async (req, res) => {
   if (req.body.author) {
     req.body.author = req.body.author.trim();
   }
+  if (req.body.text) {
+    req.body.text = req.body.text.trim();
+  }
   const comment = new Comment({
     author: !req.body.author ? 'Anonymous' : req.body.author,
     post: postId,
@@ -58,4 +61,37 @@ exports.postNewComment = asyncHandler(async (req, res) => {
     message: 'Comment created successfully',
     uri: comment.uri,
   });
+});
+
+exports.updateComment = asyncHandler(async (req, res) => {
+  const { commentId, postId } = req.params;
+  const commentToUpdate = await Comment.findById(commentId);
+  if (req.body.author) {
+    req.body.author = req.body.author.trim();
+  }
+  if (req.body.text) {
+    req.body.text = req.body.text.trim();
+  }
+  const newCommentInfo = {
+    author: req.body.author ? req.body.author : commentToUpdate.author,
+    lastEdited: Date.now(),
+    post: postId,
+    text: req.body.text ? req.body.text : commentToUpdate.text,
+    timestamp: commentToUpdate.timeStamp,
+  };
+  const updated = await Comment.findByIdAndUpdate(commentId, newCommentInfo, {
+    new: true,
+  });
+  if (updated) {
+    res.status(200).json({
+      status: 200,
+      message: 'Updated successfully',
+      comment: { ...updated._doc, uri: updated.uri },
+    });
+  } else {
+    res.status(404).json({
+      status: 404,
+      message: `Comment not found (${commentId})`,
+    });
+  }
 });
