@@ -1,30 +1,21 @@
 const asyncHandler = require('express-async-handler');
-const jwt = require('jsonwebtoken');
-const { isValidObjectId } = require('mongoose');
 const Post = require('../models/post');
 
 exports.deletePost = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  if (!isValidObjectId(id)) {
+  const deletedPost = await Post.findByIdAndDelete(id);
+  if (!deletedPost) {
+    // no post with this id in database
     res.status(404).json({
       status: 404,
       message: `Post not found (${id})`,
     });
   } else {
-    const deletedPost = await Post.findByIdAndDelete(id);
-    if (!deletedPost) {
-      // no post with this id in database
-      res.status(404).json({
-        status: 404,
-        message: `Post not found (${id})`,
-      });
-    } else {
-      // deleted successfully
-      res.json({
-        status: 200,
-        message: `Post deleted (${id})`,
-      });
-    }
+    // deleted successfully
+    res.json({
+      status: 200,
+      message: `Post deleted (${id})`,
+    });
   }
 });
 
@@ -44,21 +35,14 @@ exports.getAllPosts = asyncHandler(async (req, res) => {
 
 exports.getSinglePost = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  if (!isValidObjectId(id)) {
+  const post = await Post.findById(id).populate('author', 'name -_id');
+  if (!post) {
     res.status(404).json({
       status: 404,
-      message: `Post not found (${id})`,
+      messasge: `Post not found (${id})`,
     });
   } else {
-    const post = await Post.findById(id).populate('author', 'name -_id');
-    if (!post) {
-      res.status(404).json({
-        status: 404,
-        messasge: `Post not found (${id})`,
-      });
-    } else {
-      res.json(post);
-    }
+    res.json(post);
   }
 });
 
@@ -88,64 +72,33 @@ exports.postNewPost = [
 exports.updatePost = [
   asyncHandler(async (req, res) => {
     const { id } = req.params;
-    if (!isValidObjectId(id)) {
+    const postToUpdate = await Post.findById(id);
+    if (!postToUpdate) {
       res.status(404).json({
         status: 404,
-        message: `Post not found (${id})`,
+        messasge: `Post not found (${id})`,
       });
     } else {
-      const postToUpdate = await Post.findById(id);
-      if (!postToUpdate) {
-        res.status(404).json({
-          status: 404,
-          messasge: `Post not found (${id})`,
+      const newPostInfo = {
+        author: req.user._id,
+        lastEdited: Date.now(),
+        published: req.body.published
+          ? !!req.body.published
+          : postToUpdate.published,
+        text: req.body.text || postToUpdate.text,
+        timestamp: postToUpdate.timestamp,
+        title: req.body.title || postToUpdate.title,
+      };
+      const updated = await Post.findByIdAndUpdate(id, newPostInfo, {
+        new: true,
+      });
+      if (updated) {
+        res.status(200).json({
+          status: 200,
+          message: 'Updated successfully',
+          post: { ...updated._doc, uri: updated.uri },
         });
-      } else {
-        const newPostInfo = {
-          author: req.user._id,
-          lastEdited: Date.now(),
-          published: req.body.published
-            ? !!req.body.published
-            : postToUpdate.published,
-          text: req.body.text || postToUpdate.text,
-          timestamp: postToUpdate.timestamp,
-          title: req.body.title || postToUpdate.title,
-        };
-        const updated = await Post.findByIdAndUpdate(id, newPostInfo, {
-          new: true,
-        });
-        if (updated) {
-          res.status(200).json({
-            status: 200,
-            message: 'Updated successfully',
-            post: { ...updated._doc, uri: updated.uri },
-          });
-        }
       }
     }
   }),
 ];
-
-exports.verifyUser = (req, res, next) => {
-  // check for auth header and verify user
-  const authHeader = req.headers.authorization;
-  if (authHeader) {
-    const token = authHeader.split(' ')[1];
-    jwt.verify(token, process.env.JWT_SECRET, (err, authInfo) => {
-      if (authInfo) {
-        // add to request if jwt verified
-        req.user = authInfo.user;
-      }
-    });
-  }
-
-  // check if verified user was added to the request
-  if (req.user) {
-    next();
-  } else {
-    res.status(403).json({
-      status: 403,
-      message: 'Forbidden - authorization required',
-    });
-  }
-};
