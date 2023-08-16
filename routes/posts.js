@@ -54,6 +54,7 @@ router.get(
 router.post(
   '/:postId/comments/',
   middleware.checkValidPostId,
+  middleware.validateNewComment,
   commentController.postNewComment,
 );
 router.put(

@@ -57,13 +57,39 @@ exports.sanitizePostUpdate = [
     next();
   },
 
+  // no need to check if empty - won't be included in PATCH if so
   body('text')
     .trim()
     .escape(),
 
+  // no need to check if empty - won't be included in PATCH if so
   body('title')
     .trim()
     .escape(),
+];
+
+exports.validateNewComment = [
+  // no need to check empty - will be replaced with 'Anonymous' if so
+  body('author')
+    .trim()
+    .escape(),
+
+  body('text')
+    .trim()
+    .escape()
+    .notEmpty(),
+
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({
+        status: 400,
+        message: 'Required fields are missing or empty: text.',
+      });
+    } else {
+      next();
+    }
+  },
 ];
 
 exports.validateNewPost = [

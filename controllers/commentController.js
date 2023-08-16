@@ -42,12 +42,6 @@ exports.getSingleComment = asyncHandler(async (req, res) => {
 
 exports.postNewComment = asyncHandler(async (req, res) => {
   const { postId } = req.params;
-  if (req.body.author) {
-    req.body.author = req.body.author.trim();
-  }
-  if (req.body.text) {
-    req.body.text = req.body.text.trim();
-  }
   const comment = new Comment({
     author: !req.body.author ? 'Anonymous' : req.body.author,
     post: postId,
