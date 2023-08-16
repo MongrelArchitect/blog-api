@@ -1,6 +1,24 @@
 const asyncHandler = require('express-async-handler');
 const Comment = require('../models/comment');
 
+exports.deleteComment = asyncHandler(async (req, res) => {
+  const { commentId } = req.params;
+  const deletedComment = await Comment.findByIdAndDelete(commentId);
+  if (!deletedComment) {
+    // no post with this id in database
+    res.status(404).json({
+      status: 404,
+      message: `Comment not found (${commentId})`,
+    });
+  } else {
+    // deleted successfully
+    res.json({
+      status: 200,
+      message: `Comment deleted (${commentId})`,
+    });
+  }
+});
+
 exports.getPostComments = asyncHandler(async (req, res) => {
   const { postId } = req.params;
   const comments = await Comment.find({ post: postId }).sort({

@@ -27,10 +27,12 @@ router.put(
 );
 
 // for comments (nested within posts)
-router.post(
-  '/:postId/comments/',
+router.delete(
+  '/:postId/comments/:commentId',
+  middleware.verifyUser,
   middleware.checkValidPostId,
-  commentController.postNewComment,
+  middleware.checkValidCommentId,
+  commentController.deleteComment,
 );
 router.get(
   '/:postId/comments/',
@@ -42,6 +44,11 @@ router.get(
   middleware.checkValidPostId,
   middleware.checkValidCommentId,
   commentController.getSingleComment,
+);
+router.post(
+  '/:postId/comments/',
+  middleware.checkValidPostId,
+  commentController.postNewComment,
 );
 
 module.exports = router;
