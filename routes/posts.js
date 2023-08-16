@@ -22,6 +22,7 @@ router.patch(
   '/:postId',
   middleware.verifyUser,
   middleware.checkValidPostId,
+  middleware.sanitizePostUpdate,
   postsController.updatePost,
 );
 router.post(

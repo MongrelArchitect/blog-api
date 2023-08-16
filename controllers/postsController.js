@@ -67,7 +67,7 @@ exports.updatePost = asyncHandler(async (req, res) => {
     lastEdited: Date.now(),
   };
   // using PATCH for this, so only update fields included in the req
-  if (published) {
+  if (published !== undefined) {
     newPostInfo.published = !!published;
   }
   if (text) {

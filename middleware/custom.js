@@ -49,6 +49,23 @@ exports.checkValidPostId = asyncHandler(async (req, res, next) => {
   }
 });
 
+exports.sanitizePostUpdate = [
+  (req, res, next) => {
+    if (req.body.published) {
+      req.body.published = req.body.published.trim();
+    }
+    next();
+  },
+
+  body('text')
+    .trim()
+    .escape(),
+
+  body('title')
+    .trim()
+    .escape(),
+];
+
 exports.validateNewPost = [
   body('published')
     .trim()
