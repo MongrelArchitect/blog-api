@@ -1,7 +1,30 @@
 const asyncHandler = require('express-async-handler');
 const { isValidObjectId } = require('mongoose');
 const jwt = require('jsonwebtoken');
+const Comment = require('../models/comment');
 const Post = require('../models/post');
+
+exports.checkValidCommentId = asyncHandler(async (req, res, next) => {
+  // ensure we've got a legit mongodb id
+  const { commentId } = req.params;
+  if (!isValidObjectId(commentId)) {
+    res.status(404).json({
+      status: 404,
+      message: `Comment not found (${commentId})`,
+    });
+  } else {
+    // id looks legit, let's make sure we have it
+    const postExists = await Comment.exists({ _id: commentId });
+    if (!postExists) {
+      res.status(404).json({
+        status: 404,
+        message: `Comment not found (${commentId})`,
+      });
+    } else {
+      next();
+    }
+  }
+});
 
 exports.checkValidPostId = asyncHandler(async (req, res, next) => {
   // ensure we've got a legit mongodb id

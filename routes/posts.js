@@ -37,5 +37,11 @@ router.get(
   middleware.checkValidPostId,
   commentController.getPostComments,
 );
+router.get(
+  '/:postId/comments/:commentId/',
+  middleware.checkValidPostId,
+  middleware.checkValidCommentId,
+  commentController.getSingleComment,
+);
 
 module.exports = router;

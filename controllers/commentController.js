@@ -3,7 +3,7 @@ const Comment = require('../models/comment');
 
 exports.getPostComments = asyncHandler(async (req, res) => {
   const { postId } = req.params;
-  const comments = await Comment.find({ post: postId }, '-post -__v').sort({
+  const comments = await Comment.find({ post: postId }).sort({
     timestamp: 1,
   });
   if (!comments) {
@@ -14,6 +14,12 @@ exports.getPostComments = asyncHandler(async (req, res) => {
   } else {
     res.json(comments);
   }
+});
+
+exports.getSingleComment = asyncHandler(async (req, res) => {
+  const { commentId } = req.params;
+  const comment = await Comment.findById(commentId);
+  res.json(comment);
 });
 
 exports.postNewComment = asyncHandler(async (req, res) => {
