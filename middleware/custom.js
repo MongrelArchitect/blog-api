@@ -49,7 +49,7 @@ exports.checkValidPostId = asyncHandler(async (req, res, next) => {
   }
 });
 
-exports.validatePostContent = [
+exports.validateNewPost = [
   body('published')
     .trim()
     .escape(),

@@ -62,28 +62,33 @@ exports.postNewPost = asyncHandler(async (req, res, next) => {
 });
 
 exports.updatePost = asyncHandler(async (req, res) => {
-  const { postId } = req.params;
-  const postToUpdate = await Post.findById(postId);
+  const { published, text, title } = req.body;
   const newPostInfo = {
-    author: req.user._id,
     lastEdited: Date.now(),
-    published: req.body.published
-      ? !!req.body.published
-      : postToUpdate.published,
-    text: req.body.text || postToUpdate.text,
-    timestamp: postToUpdate.timestamp,
-    title: req.body.title || postToUpdate.title,
   };
+  // using PATCH for this, so only update fields included in the req
+  if (published) {
+    newPostInfo.published = !!published;
+  }
+  if (text) {
+    newPostInfo.text = text;
+  }
+  if (title) {
+    newPostInfo.title = title;
+  }
+
+  const { postId } = req.params;
   const updated = await Post.findByIdAndUpdate(postId, newPostInfo, {
     new: true,
-  });
+  }).populate('author', '-_id');
   if (updated) {
     res.status(200).json({
       status: 200,
       message: 'Updated successfully',
-      post: { ...updated._doc, uri: updated.uri },
+      post: { ...updated._doc, author: updated.author.name, uri: updated.uri },
     });
   } else {
+    // just in case something screwed up with mongoose updating doc
     res.status(404).json({
       status: 404,
       message: `Post not found (${postId})`,

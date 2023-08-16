@@ -18,17 +18,17 @@ router.get(
   middleware.checkValidPostId,
   postsController.getSinglePost,
 );
-router.post(
-  '/',
-  middleware.verifyUser,
-  middleware.validatePostContent,
-  postsController.postNewPost,
-);
-router.put(
+router.patch(
   '/:postId',
   middleware.verifyUser,
   middleware.checkValidPostId,
   postsController.updatePost,
+);
+router.post(
+  '/',
+  middleware.verifyUser,
+  middleware.validateNewPost,
+  postsController.postNewPost,
 );
 
 // for comments (nested within posts)
