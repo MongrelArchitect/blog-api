@@ -15,4 +15,8 @@ PostSchema.virtual('uri').get(function getUri() {
   return `/posts/${this._id}`;
 });
 
+PostSchema.virtual('comments').get(function getUri() {
+  return `/posts/${this._id}/comments`;
+});
+
 module.exports = mongoose.model('Post', PostSchema);

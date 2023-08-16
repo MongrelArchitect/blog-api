@@ -35,15 +35,10 @@ exports.getAllPosts = asyncHandler(async (req, res) => {
 
 exports.getSinglePost = asyncHandler(async (req, res) => {
   const { postId } = req.params;
-  const post = await Post.findById(postId).populate('author', 'name -_id');
-  if (!post) {
-    res.status(404).json({
-      status: 404,
-      messasge: `Post not found (${postId})`,
-    });
-  } else {
-    res.json(post);
-  }
+  let post = await Post.findById(postId, '-__v').populate('author', 'name -_id');
+  // simplify 'author' value
+  post = { ...post._doc, author: post.author.name, comments: post.comments };
+  res.json(post);
 });
 
 exports.postNewPost = asyncHandler(async (req, res, next) => {
