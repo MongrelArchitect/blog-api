@@ -35,7 +35,10 @@ exports.getAllPosts = asyncHandler(async (req, res) => {
 
 exports.getSinglePost = asyncHandler(async (req, res) => {
   const { postId } = req.params;
-  let post = await Post.findById(postId, '-__v').populate('author', 'name -_id');
+  let post = await Post.findById(postId, '-__v').populate(
+    'author',
+    'name -_id',
+  );
   // simplify 'author' value
   post = { ...post._doc, author: post.author.name, comments: post.comments };
   res.json(post);
@@ -61,31 +64,29 @@ exports.postNewPost = asyncHandler(async (req, res, next) => {
 exports.updatePost = asyncHandler(async (req, res) => {
   const { postId } = req.params;
   const postToUpdate = await Post.findById(postId);
-  if (!postToUpdate) {
-    res.status(404).json({
-      status: 404,
-      messasge: `Post not found (${postId})`,
+  const newPostInfo = {
+    author: req.user._id,
+    lastEdited: Date.now(),
+    published: req.body.published
+      ? !!req.body.published
+      : postToUpdate.published,
+    text: req.body.text || postToUpdate.text,
+    timestamp: postToUpdate.timestamp,
+    title: req.body.title || postToUpdate.title,
+  };
+  const updated = await Post.findByIdAndUpdate(postId, newPostInfo, {
+    new: true,
+  });
+  if (updated) {
+    res.status(200).json({
+      status: 200,
+      message: 'Updated successfully',
+      post: { ...updated._doc, uri: updated.uri },
     });
   } else {
-    const newPostInfo = {
-      author: req.user._id,
-      lastEdited: Date.now(),
-      published: req.body.published
-        ? !!req.body.published
-        : postToUpdate.published,
-      text: req.body.text || postToUpdate.text,
-      timestamp: postToUpdate.timestamp,
-      title: req.body.title || postToUpdate.title,
-    };
-    const updated = await Post.findByIdAndUpdate(postId, newPostInfo, {
-      new: true,
+    res.status(404).json({
+      status: 404,
+      message: `Post not found (${postId})`,
     });
-    if (updated) {
-      res.status(200).json({
-        status: 200,
-        message: 'Updated successfully',
-        post: { ...updated._doc, uri: updated.uri },
-      });
-    }
   }
 });
