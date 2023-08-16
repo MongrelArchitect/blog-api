@@ -30,7 +30,10 @@ const jsonError = (err, req, res, next) => {
     .status(500)
     .json({
       status: 500,
-      message: err.message,
+      error: {
+        name: err.name,
+        message: err.message,
+      },
     });
 };
 
