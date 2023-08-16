@@ -1,5 +1,4 @@
 const express = require('express');
-const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose');
 require('dotenv').config();
@@ -38,7 +37,6 @@ const jsonError = (err, req, res, next) => {
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 
 app.use('/login', loginRoutes);
 app.use('/posts', postsRoutes);
