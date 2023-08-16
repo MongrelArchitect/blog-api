@@ -18,7 +18,12 @@ router.get(
   middleware.checkValidPostId,
   postsController.getSinglePost,
 );
-router.post('/', middleware.verifyUser, postsController.postNewPost);
+router.post(
+  '/',
+  middleware.verifyUser,
+  middleware.validatePostContent,
+  postsController.postNewPost,
+);
 router.put(
   '/:postId',
   middleware.verifyUser,
