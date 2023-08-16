@@ -60,12 +60,6 @@ exports.postNewComment = asyncHandler(async (req, res) => {
 exports.updateComment = asyncHandler(async (req, res) => {
   const { commentId, postId } = req.params;
   const commentToUpdate = await Comment.findById(commentId);
-  if (req.body.author) {
-    req.body.author = req.body.author.trim();
-  }
-  if (req.body.text) {
-    req.body.text = req.body.text.trim();
-  }
   const newCommentInfo = {
     author: req.body.author ? req.body.author : commentToUpdate.author,
     lastEdited: Date.now(),

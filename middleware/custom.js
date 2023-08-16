@@ -49,6 +49,18 @@ exports.checkValidPostId = asyncHandler(async (req, res, next) => {
   }
 });
 
+exports.sanitizeCommentUpdate = [
+  // no need to check if empty - won't be included in PATCH if so
+  body('author')
+    .trim()
+    .escape(),
+
+  // no need to check if empty - won't be included in PATCH if so
+  body('text')
+    .trim()
+    .escape(),
+];
+
 exports.sanitizePostUpdate = [
   (req, res, next) => {
     if (req.body.published) {
