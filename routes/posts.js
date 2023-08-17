@@ -1,7 +1,9 @@
 const express = require('express');
 const postsController = require('../controllers/postsController');
 const commentController = require('../controllers/commentController');
-const middleware = require('../middleware/custom');
+const authMiddleware = require('../middleware/auth');
+const commentMiddleware = require('../middleware/comments');
+const postMiddleware = require('../middleware/posts');
 
 const router = express.Router();
 
@@ -10,8 +12,8 @@ const router = express.Router();
 // delete a single post
 router.delete(
   '/:postId',
-  middleware.verifyUser,
-  middleware.checkValidPostId,
+  authMiddleware.verifyUser,
+  postMiddleware.checkValidPostId,
   postsController.deletePost,
 );
 
@@ -21,24 +23,24 @@ router.get('/', postsController.getAllPosts);
 // get a single post
 router.get(
   '/:postId',
-  middleware.checkValidPostId,
+  postMiddleware.checkValidPostId,
   postsController.getSinglePost,
 );
 
 // update a single post
 router.patch(
   '/:postId',
-  middleware.verifyUser,
-  middleware.checkValidPostId,
-  middleware.sanitizePostUpdate,
+  authMiddleware.verifyUser,
+  postMiddleware.checkValidPostId,
+  postMiddleware.sanitizePostUpdate,
   postsController.updatePost,
 );
 
 // create a new post
 router.post(
   '/',
-  middleware.verifyUser,
-  middleware.validateNewPost,
+  authMiddleware.verifyUser,
+  postMiddleware.validateNewPost,
   postsController.postNewPost,
 );
 
@@ -47,42 +49,42 @@ router.post(
 // delete a single comment
 router.delete(
   '/:postId/comments/:commentId',
-  middleware.verifyUser,
-  middleware.checkValidPostId,
-  middleware.checkValidCommentId,
+  authMiddleware.verifyUser,
+  postMiddleware.checkValidPostId,
+  commentMiddleware.checkValidCommentId,
   commentController.deleteComment,
 );
 
 // get all comments for a particular post
 router.get(
   '/:postId/comments/',
-  middleware.checkValidPostId,
+  postMiddleware.checkValidPostId,
   commentController.getPostComments,
 );
 
 // get a single comment for a particular post
 router.get(
   '/:postId/comments/:commentId/',
-  middleware.checkValidPostId,
-  middleware.checkValidCommentId,
+  postMiddleware.checkValidPostId,
+  commentMiddleware.checkValidCommentId,
   commentController.getSingleComment,
 );
 
 // update a single comment for a particular post
 router.patch(
   '/:postId/comments/:commentId',
-  middleware.verifyUser,
-  middleware.checkValidPostId,
-  middleware.checkValidCommentId,
-  middleware.sanitizeCommentUpdate,
+  authMiddleware.verifyUser,
+  postMiddleware.checkValidPostId,
+  commentMiddleware.checkValidCommentId,
+  commentMiddleware.sanitizeCommentUpdate,
   commentController.updateComment,
 );
 
 // create a new comment for a particular post
 router.post(
   '/:postId/comments/',
-  middleware.checkValidPostId,
-  middleware.validateNewComment,
+  postMiddleware.checkValidPostId,
+  commentMiddleware.validateNewComment,
   commentController.postNewComment,
 );
 
