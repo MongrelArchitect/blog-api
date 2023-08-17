@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const { isValidObjectId } = require('mongoose');
 const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
+const validator = require('validator');
 const Comment = require('../models/comment');
 const Post = require('../models/post');
 
@@ -50,10 +51,15 @@ exports.checkValidPostId = asyncHandler(async (req, res, next) => {
 });
 
 exports.sanitizeCommentUpdate = [
-  // no need to check if empty - won't be included in PATCH if so
-  body('author')
-    .trim()
-    .escape(),
+  // controller checks for an empty string to replace author with
+  // 'Anonymous' so we can't use express-validator here
+  (req, res, next) => {
+    if (req.body.author) {
+      req.body.author = req.body.author.trim();
+      req.body.author = validator.escape(req.body.author);
+    }
+    next();
+  },
 
   // no need to check if empty - won't be included in PATCH if so
   body('text')

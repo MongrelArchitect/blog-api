@@ -58,15 +58,20 @@ exports.postNewComment = asyncHandler(async (req, res) => {
 });
 
 exports.updateComment = asyncHandler(async (req, res) => {
-  const { commentId, postId } = req.params;
-  const commentToUpdate = await Comment.findById(commentId);
+  const { author, text } = req.body;
+
   const newCommentInfo = {
-    author: req.body.author ? req.body.author : commentToUpdate.author,
     lastEdited: Date.now(),
-    post: postId,
-    text: req.body.text ? req.body.text : commentToUpdate.text,
-    timestamp: commentToUpdate.timeStamp,
   };
+  // using PATCH for this, so only update fields included in the req
+  if (author !== undefined) {
+    newCommentInfo.author = author || 'Anonymous';
+  }
+  if (text) {
+    newCommentInfo.text = text;
+  }
+
+  const { commentId } = req.params;
   const updated = await Comment.findByIdAndUpdate(commentId, newCommentInfo, {
     new: true,
   });
@@ -77,6 +82,7 @@ exports.updateComment = asyncHandler(async (req, res) => {
       comment: { ...updated._doc, uri: updated.uri },
     });
   } else {
+    // just in case something screwed up with mongoose updating doc
     res.status(404).json({
       status: 404,
       message: `Comment not found (${commentId})`,

@@ -68,22 +68,22 @@ router.get(
   commentController.getSingleComment,
 );
 
-// create a new comment for a particular post
-router.post(
-  '/:postId/comments/',
-  middleware.checkValidPostId,
-  middleware.validateNewComment,
-  commentController.postNewComment,
-);
-
 // update a single comment for a particular post
-router.put(
+router.patch(
   '/:postId/comments/:commentId',
   middleware.verifyUser,
   middleware.checkValidPostId,
   middleware.checkValidCommentId,
   middleware.sanitizeCommentUpdate,
   commentController.updateComment,
+);
+
+// create a new comment for a particular post
+router.post(
+  '/:postId/comments/',
+  middleware.checkValidPostId,
+  middleware.validateNewComment,
+  commentController.postNewComment,
 );
 
 module.exports = router;
