@@ -29,7 +29,12 @@ exports.getAllPosts = asyncHandler(async (req, res) => {
       message: 'Posts not found',
     });
   } else {
-    res.json({ status: 200, posts: allPosts });
+    // simplify the 'author' value for each post to be just the name
+    const simpleAuthors = [];
+    allPosts.forEach((post) => {
+      simpleAuthors.push({ ...post._doc, author: post._doc.author.name });
+    });
+    res.json({ status: 200, posts: simpleAuthors });
   }
 });
 
