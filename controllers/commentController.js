@@ -30,14 +30,17 @@ exports.getPostComments = asyncHandler(async (req, res) => {
       message: `Comments not found for post ${postId}`,
     });
   } else {
-    res.json(comments);
+    res.json({
+      status: 200,
+      comments,
+    });
   }
 });
 
 exports.getSingleComment = asyncHandler(async (req, res) => {
   const { commentId } = req.params;
   const comment = await Comment.findById(commentId);
-  res.json(comment);
+  res.json({ status: 200, comment });
 });
 
 exports.postNewComment = asyncHandler(async (req, res) => {
