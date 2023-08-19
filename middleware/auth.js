@@ -3,6 +3,24 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
+const authenticateUser = (req, res, next) => {
+  // check for auth header and verify user
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    // Extract <token> from 'Bearer <token>' in auth header
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.JWT_SECRET, (err, authInfo) => {
+      if (authInfo) {
+        // add to request if jwt verified
+        req.user = authInfo.user;
+      }
+    });
+  }
+  next();
+};
+
+exports.authenticateUser = authenticateUser;
+
 exports.checkEmail = asyncHandler(async (req, res, next) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
@@ -46,27 +64,19 @@ exports.checkRequest = (req, res, next) => {
   }
 };
 
-exports.verifyUser = (req, res, next) => {
-  // check for auth header and verify user
-  const authHeader = req.headers.authorization;
-  if (authHeader) {
-    // Extract <token> from 'Bearer <token>' in auth header
-    const token = authHeader.split(' ')[1];
-    jwt.verify(token, process.env.JWT_SECRET, (err, authInfo) => {
-      if (authInfo) {
-        // add to request if jwt verified
-        req.user = authInfo.user;
-      }
-    });
-  }
+exports.verifyUser = [
+  // will add user to request if provided a valid token
+  authenticateUser,
 
   // check if verified user was added to the request
-  if (req.user) {
-    next();
-  } else {
-    res.status(403).json({
-      status: 403,
-      message: 'Forbidden - authorization required',
-    });
-  }
-};
+  (req, res, next) => {
+    if (req.user) {
+      next();
+    } else {
+      res.status(403).json({
+        status: 403,
+        message: 'Forbidden - authorization required',
+      });
+    }
+  },
+];

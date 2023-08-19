@@ -20,7 +20,11 @@ exports.deletePost = asyncHandler(async (req, res) => {
 });
 
 exports.getAllPosts = asyncHandler(async (req, res) => {
-  const allPosts = await Post.find({})
+  const filter = {};
+  if (!req.user) {
+    filter.published = true;
+  }
+  const allPosts = await Post.find(filter)
     .populate('author', 'name -_id')
     .sort({ timestamp: -1 });
   if (!allPosts.length) {

@@ -18,7 +18,7 @@ router.delete(
 );
 
 // get all posts
-router.get('/', postsController.getAllPosts);
+router.get('/', authMiddleware.authenticateUser, postsController.getAllPosts);
 
 // get a single post
 router.get(
