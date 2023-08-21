@@ -39,7 +39,13 @@ const jsonError = (err, req, res, next) => {
 };
 
 app.use(cors({
-  origin: process.env.CORS_ORIGIN,
+  origin: (origin, callback) => {
+    if (process.env.CORS_ORIGIN.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
 }));
 app.use(logger('dev'));
 app.use(express.json());
